@@ -57,27 +57,38 @@ class decisionTree:
         if len(data) == 0 or len(data.columns) == 0:  # base case 1
             # empty branch
             return y.max()
-        elif stats.itemfreq(y.values.flatten()) == len(data):  # base case 2
-            return stats.mode(y.values().flatten())
+        # elif stats.itemfreq(y.values.flatten()) == len(data):  # base case 2
+        #     return stats.mode(y.values().flatten())
         else:
             classes = []
             averages = []
+            lowest_entropy = 300.0
+            # All the features
             for column in data:
+                # look at entropies
                 entropies = []
+                # here are all the features in that column ex: old, young
                 features = pd.unique(data[column])
+                # calculate entropy of feature ex: old vs. young
                 for feature in features:
                     for i in range(len(data[column])):
                         if data.loc[i, column] == feature:
                             classes.append(y.iloc[i, 0])
+                    # entropy of old vs. young
                     entropies.append(calc_entropy(classes))
                     classes.clear()
                 for entropy in entropies:
                     average = 0.0
+                    # adjust for number of elements in feature
                     average += entropy * len(features) / len(data[column])
                     averages.append(average)
-                    if average < min(averages):
-                        root.data = [column, min(averages)]
+                    # make the root the lowest entropy if it is the lowest of all the columns
+                    average_of_averages = sum(averages)/len(averages)
+                    if average_of_averages < lowest_entropy:
+                        lowest_entropy = average_of_averages
+                        root.data = [column, average_of_averages]
                 entropies.clear()
+
 
 
 if __name__ == "__main__":
